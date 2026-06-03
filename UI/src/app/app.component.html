@@ -1,0 +1,316 @@
+<div class="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-16">
+  
+  <!-- Main Header Banner -->
+  <header class="bg-slate-900/60 border-b border-slate-850/80 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-4 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-blue-400">
+          <!-- Plane Icon -->
+          <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-lg font-bold font-display text-white tracking-tight uppercase">Tashkent International Airport (TAS)</h1>
+            <span class="text-[9px] bg-blue-500/15 text-blue-400 border border-blue-500/25 px-2 py-0.2 rounded-full font-mono font-bold">T2 TERMINAL</span>
+          </div>
+          <p class="text-xs text-slate-400 font-mono">Bilingual VIP & Regular Passenger Segregation System & Queue Web API</p>
+        </div>
+      </div>
+
+      <!-- Header actions panel with UTC time tracker & Reset simulation buttons -->
+      <div class="flex items-center space-x-4">
+        <!-- Live Indicator -->
+        <div class="hidden md:flex items-center space-x-2 bg-slate-950/60 border border-slate-850 px-3 py-1.5 rounded-xl font-mono text-[10px] text-slate-400">
+          <span class="flex h-1.5 w-1.5 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
+          </span>
+          <span>Live Tracking (UTC)</span>
+        </div>
+
+        <button
+          (click)="resetQueue()"
+          [disabled]="state.isLoading"
+          type="button"
+          class="px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 disabled:opacity-50 text-xs rounded-xl border border-rose-500/20 font-semibold transition-colors duration-200 cursor-pointer flex items-center space-x-1 font-mono"
+        >
+          <!-- TrashIcon -->
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          <span>Tizimni Qayta Tiklash (Reset)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Error Alert -->
+  <div *ngIf="state.errorMessage" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+    <div class="p-3 bg-red-950/40 border border-red-900/30 text-red-400 text-xs rounded-xl flex justify-between items-center font-mono animate-pulse">
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>{{ state.errorMessage }}</span>
+      </div>
+      <button (click)="refreshState()" class="px-2.5 py-0.5 bg-red-900/40 hover:bg-red-900/60 rounded text-[10px] text-red-200 uppercase font-bold cursor-pointer">Retry</button>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Space -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-6 w-full flex-1">
+    
+    <!-- Statistics Section -->
+    <app-airport-stats [stats]="state.stats"></app-airport-stats>
+
+    <!-- Policy Explainer Panel -->
+    <app-policy-explainer></app-policy-explainer>
+
+    <!-- Counter Panels Grid Section -->
+    <section class="space-y-4">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-850">
+        <div>
+          <h2 class="text-base font-bold text-slate-100 tracking-tight font-sans">
+            Ro'yxatdan O'tish Darchalari (Operational Counters)
+          </h2>
+          <p class="text-xs text-slate-400">VIP/Priority va ekonom darchalar oqimi real vaqtda boshqariladi</p>
+        </div>
+        <span class="text-xs bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-full font-mono text-slate-300">
+          Active: {{ state.stats.activeDesksCount }} / 6
+        </span>
+      </div>
+
+      <!-- Grids of Desk Components -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <app-desk-card
+          *ngFor="let d of state.desks"
+          [desk]="d"
+          [isLoading]="state.isLoading"
+          (onCallPassenger)="handleCallPassenger($event)"
+          (onCompletePassenger)="handleCompletePassenger($event)"
+          (onToggleDesk)="handleToggleDesk($event)"
+        ></app-desk-card>
+      </div>
+    </section>
+
+    <!-- Lower Panels Columns Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Column 1: Live Queue Tracks (VIP & Economy Waiting lists) -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 shadow-lg backdrop-blur-md">
+          <div class="flex justify-between items-center pb-4 mb-4 border-b border-slate-800">
+            <div class="flex items-center space-x-2">
+              <!-- ListOrderedIcon -->
+              <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4M4 10h2M4 16h2v2H4"/>
+              </svg>
+              <h3 class="font-bold text-slate-100 text-sm uppercase tracking-wider font-mono">Faol Navbat kutiluvchilari</h3>
+            </div>
+            <div class="flex items-center space-x-3 text-xs">
+              <span class="flex items-center text-amber-500 font-bold font-mono">
+                👑 VIP: {{ state.vipQueue.length }}
+              </span>
+              <span class="text-slate-850">|</span>
+              <span class="flex items-center text-blue-400 font-bold font-mono">
+                ✈️ Ekonom: {{ state.regularQueue.length }}
+              </span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- VIP Waiting Pool -->
+            <div class="space-y-3">
+              <div class="flex justify-between items-center p-2.5 bg-amber-500/5 rounded-xl border border-amber-500/25">
+                <span class="text-[11px] font-bold text-amber-400 font-mono uppercase flex items-center space-x-1">
+                  <!-- AwardIcon -->
+                  <svg class="w-4 h-4 text-amber-500 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                  </svg>
+                  VIP (CIP) Yo'lak
+                </span>
+                <span class="bg-amber-500/10 text-amber-400 text-[10px] font-mono px-2 py-0.5 rounded-full font-bold border border-amber-500/20">
+                  {{ state.vipQueue.length }} navbatda
+                </span>
+              </div>
+
+              <div *ngIf="state.vipQueue.length === 0" class="text-center py-10 bg-slate-950/20 rounded-xl border border-dashed border-slate-850">
+                <p class="text-xs text-slate-500 font-mono">VIP kutilayotganlar yo'q</p>
+              </div>
+
+              <div *ngIf="state.vipQueue.length > 0" class="space-y-2.5 max-h-[310px] overflow-y-auto pr-1">
+                <div 
+                  *ngFor="let p of state.vipQueue" 
+                  class="p-3 bg-amber-500/5 border border-amber-500/15 rounded-xl flex justify-between items-center shadow-sm transition duration-150 hover:bg-amber-500/10"
+                >
+                  <div>
+                    <div class="flex items-center space-x-1.5">
+                      <span class="text-xs font-bold text-amber-400">{{ p.name }}</span>
+                      <span class="text-[9px] bg-amber-500/20 px-1.5 py-0.2 rounded text-amber-300 font-mono font-bold">#{{ p.queueNumber }}</span>
+                    </div>
+                    <div class="flex gap-2 text-[10px] text-slate-400 mt-1 font-mono">
+                      <span>Reys: <strong class="text-slate-300">{{ p.flightNumber }}</strong></span>
+                      <span>Vazn: <strong class="text-slate-300">{{ p.baggageWeight }}kg</strong></span>
+                    </div>
+                    <span class="text-[10px] block mt-0.5 text-amber-500/80 font-medium font-sans">
+                      Sohasi: {{ p.vipReason }}
+                    </span>
+                  </div>
+                  
+                  <div class="text-right">
+                    <span class="text-[10px] font-mono font-bold bg-slate-950 text-amber-500 border border-amber-500/10 px-1.5 py-0.5 rounded block">
+                      ⏳ {{ p.waitTime }} min
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Economy/Regular waiting Pool -->
+            <div class="space-y-3">
+              <div class="flex justify-between items-center p-2.5 bg-blue-500/5 rounded-xl border border-blue-500/20">
+                <span class="text-[11px] font-bold text-blue-400 font-mono uppercase flex items-center space-x-1">
+                  <!-- UsersIcon -->
+                  <svg class="w-4 h-4 text-blue-400 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                  Ekonom Yo'lak
+                </span>
+                <span class="bg-blue-500/10 text-blue-400 text-[10px] font-mono px-2 py-0.5 rounded-full font-bold border border-blue-500/10">
+                  {{ state.regularQueue.length }} navbatda
+                </span>
+              </div>
+
+              <div *ngIf="state.regularQueue.length === 0" class="text-center py-10 bg-slate-950/20 rounded-xl border border-dashed border-slate-850">
+                <p class="text-xs text-slate-500 font-mono">Ekonom kutilayotganlar yo'q</p>
+              </div>
+
+              <div *ngIf="state.regularQueue.length > 0" class="space-y-2.5 max-h-[310px] overflow-y-auto pr-1">
+                <div 
+                  *ngFor="let p of state.regularQueue" 
+                  class="p-3 bg-slate-900/30 border border-slate-800 rounded-xl flex justify-between items-center shadow-sm transition duration-150 hover:bg-slate-800/40"
+                >
+                  <div>
+                    <div class="flex items-center space-x-1.5">
+                      <span class="text-xs font-bold text-slate-200">{{ p.name }}</span>
+                      <span class="text-[9px] bg-slate-800 px-1.5 py-0.2 rounded text-slate-400 font-mono font-bold">#{{ p.queueNumber }}</span>
+                    </div>
+                    <div class="flex gap-2 text-[10px] text-slate-400 mt-1 font-mono">
+                      <span>Reys: <strong class="text-slate-200">{{ p.flightNumber }}</strong></span>
+                      <span>Vazn: <strong class="text-slate-200">{{ p.baggageWeight }}kg</strong></span>
+                    </div>
+                  </div>
+                  
+                  <div class="text-right">
+                    <span class="text-[10px] font-mono font-bold bg-slate-950 text-slate-300 border border-slate-800 px-1.5 py-0.5 rounded block">
+                      ⏳ {{ p.waitTime }} min
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Boarding History Certificate passes -->
+        <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 shadow-lg backdrop-blur-md">
+          <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+            <div class="flex items-center space-x-2">
+              <!-- HistoryIcon -->
+              <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <h3 class="font-bold text-slate-100 text-sm uppercase tracking-wider font-mono">Muvaffaqiyatli Check-in qilinganlar (Boarding Tickets)</h3>
+            </div>
+            <span class="text-[11px] font-mono text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+              Soni (Last 10): {{ state.history.length }}
+            </span>
+          </div>
+
+          <div *ngIf="state.history.length === 0" class="text-center py-10 text-slate-500 text-xs font-mono">
+            Hali hech kim check-in qilmadi. Darchalarda "Yakunlash" tugmasini bosing!
+          </div>
+
+          <div *ngIf="state.history.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div 
+              *ngFor="let p of state.history" 
+              class="border border-slate-800 rounded-xl overflow-hidden shadow-md relative bg-slate-950 flex flex-col font-mono text-[11px] text-slate-300"
+            >
+              <!-- Card Header class identifier -->
+              <div 
+                class="p-2.5 flex justify-between items-center text-white"
+                [ngClass]="p.class === 'VIP' ? 'bg-amber-500/10 border-b border-amber-500/20 text-amber-400 font-bold' : 'bg-slate-900 border-b border-slate-800 text-slate-300'"
+              >
+                <span class="font-bold tracking-wider text-[10px]">BOARDING PASS / CHIPTA</span>
+                <span 
+                  class="font-bold text-[10px] px-2 py-0.5 rounded"
+                  [ngClass]="p.class === 'VIP' ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-850'"
+                >
+                  {{ p.class === 'VIP' ? '👑 VIP' : '✈️ COACH' }}
+                </span>
+              </div>
+
+              <!-- Ticket content grid -->
+              <div class="p-3.5 space-y-2.5 bg-slate-900/30">
+                <div class="flex justify-between">
+                  <div>
+                    <span class="text-[9px] text-slate-500 block uppercase">Yo'lovchi</span>
+                    <span class="text-xs font-bold text-slate-200 font-sans tracking-tight">{{ p.name }}</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-[9px] text-slate-500 block uppercase">Navbat ID</span>
+                    <span class="text-xs font-bold font-mono text-slate-200">{{ p.queueNumber }}</span>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 py-1.5 border-y border-dashed border-slate-800 text-center">
+                  <div>
+                    <span class="text-[8px] text-slate-500 block uppercase">Reys</span>
+                    <span class="font-bold text-slate-200">{{ p.flightNumber }}</span>
+                  </div>
+                  <div>
+                    <span class="text-[8px] text-slate-500 block uppercase">O'rindiq</span>
+                    <span class="font-bold text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-1 rounded">{{ p.seatAssignment || 'A1' }}</span>
+                  </div>
+                  <div>
+                    <span class="text-[8px] text-slate-500 block uppercase">Yuk</span>
+                    <span class="font-bold text-slate-200">{{ p.baggageWeight }} kg</span>
+                  </div>
+                </div>
+
+                <div class="flex justify-between items-center text-[9px] text-slate-500 pt-1">
+                  <span>Toshkent (TAS) ➔ {{ p.destination }}</span>
+                  <span class="text-[8px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.2 rounded font-bold uppercase tracking-wider">Checked In</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Column 2: Dashboard Control widgets (Form registration & AI chat helper) -->
+      <div id="controls-right-column" class="space-y-6">
+        
+        <!-- Registration Form -->
+        <app-passenger-form
+          [flights]="state.flights"
+          [isLoading]="state.isLoading"
+          (onAddPassenger)="handleAddPassenger($event)"
+          (onSimulateBulk)="handleSimulateBulk()"
+        ></app-passenger-form>
+
+        <!-- AI Assistant Advisor -->
+        <app-staff-chat></app-staff-chat>
+
+      </div>
+
+    </div>
+
+  </main>
+</div>
