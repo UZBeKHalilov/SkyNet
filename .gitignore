@@ -2,6 +2,7 @@ node_modules/
 build/
 bin/
 obj/
+cache/
 .vs/
 dist/
 coverage/
