@@ -95,6 +95,13 @@
       </div>
     </section>
 
+    <!-- Aircraft Seating Map -->
+    <app-aircraft-map
+      [desks]="state.desks"
+      [history]="state.history"
+      [flights]="state.flights"
+    ></app-aircraft-map>
+
     <!-- Lower Panels Columns Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       

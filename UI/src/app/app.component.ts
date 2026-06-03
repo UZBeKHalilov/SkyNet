@@ -9,6 +9,7 @@ import { PolicyExplainerComponent } from './components/policy-explainer/policy-e
 import { DeskCardComponent } from './components/desk-card/desk-card.component';
 import { PassengerFormComponent } from './components/passenger-form/passenger-form.component';
 import { StaffChatComponent } from './components/staff-chat/staff-chat.component';
+import { AircraftMapComponent } from './components/aircraft-map/aircraft-map.component';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +20,8 @@ import { StaffChatComponent } from './components/staff-chat/staff-chat.component
     PolicyExplainerComponent,
     DeskCardComponent,
     PassengerFormComponent,
-    StaffChatComponent
+    StaffChatComponent,
+    AircraftMapComponent
   ],
   templateUrl: './app.component.html'
 })

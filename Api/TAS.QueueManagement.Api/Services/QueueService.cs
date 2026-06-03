@@ -414,8 +414,18 @@ namespace TAS.QueueManagement.Api.Services
                     selectedPassenger.Status = "In-Service";
                     selectedPassenger.ServiceTime = DateTime.UtcNow;
 
-                    int seatRow = selectedPassenger.Class == PassengerClass.VIP ? rand.Next(1, 5) : rand.Next(6, 40);
-                    string seatLetter = new[] { "A", "C", "D", "F" }[rand.Next(4)];
+                    int seatRow = selectedPassenger.Class == PassengerClass.VIP
+                        ? (selectedPassenger.VipReason switch
+                        {
+                            "Diplomacy/Gov" => 1,
+                            "First Class" => 2,
+                            "CIP Lounge Guest" => 3,
+                            "Business Class" => 4,
+                            "Premium Loyalty" => 5,
+                            _ => 5
+                        })
+                        : rand.Next(6, 31);
+                    string seatLetter = new[] { "A", "B", "C", "D", "E", "F" }[rand.Next(6)];
                     selectedPassenger.SeatAssignment = $"{seatRow}{seatLetter}";
 
                     desk.CurrentPassenger = selectedPassenger;

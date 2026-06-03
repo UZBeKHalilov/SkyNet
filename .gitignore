@@ -1,8 +1,49 @@
+# General / System
+.DS_Store
+Thumbs.db
+*.log
+.env*
+!.env.example
+
+# Node / Web Applet Roots
 node_modules/
 build/
 dist/
 coverage/
-.DS_Store
-*.log
-.env*
-!.env.example
+.npm
+.yarn
+
+# Angular (UI) specific
+/UI/.angular/
+/UI/dist/
+/UI/node_modules/
+/UI/coverage/
+/UI/.sass-cache/
+/UI/.sourcemaps/
+/UI/tmp/
+
+# .NET (Api) specific
+# Build folders
+[Bb]in/
+[Oo]bj/
+# VS and Rider config files
+.vs/
+.idea/
+.vscode/
+*.user
+*.userosscache
+*.sln.docstates
+# NuGet Packages
+*.nupkg
+# Package restore artifacts
+**/paket-files/
+project.lock.json
+project.assets.json
+# Rider/Resharper
+*.suo
+*.user
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
