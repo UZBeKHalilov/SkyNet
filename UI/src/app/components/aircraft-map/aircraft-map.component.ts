@@ -36,7 +36,7 @@ import { Passenger, CheckInDesk, FlightInfo } from '../../models/queue.models';
               class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="ALL" class="bg-slate-900 text-slate-100">Barcha Reyslar (All)</option>
-              <option *ngFor="let f of flights" [value]="f.flightNumber]" class="bg-slate-900 text-slate-100">
+              <option *ngFor="let f of flights" [value]="[f.flightNumber]" class="bg-slate-900 text-slate-100">
                 {{ f.flightNumber }} ➔ {{ f.destination }}
               </option>
             </select>

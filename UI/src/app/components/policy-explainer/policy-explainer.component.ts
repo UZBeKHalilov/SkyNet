@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div id="policy-explainer-section" class="bg-slate-900/40 border border-slate-800 shadow-lg p-6 lg:p-8 rounded-2xl backdrop-blur-md">
+    <div id="policy-explainer-section" class="bg-slate-900/40 border border-slate-800 shadow-lg p-6 lg:p-8 rounded-2xl backdrop-blur-md mt-10">
       <div class="flex items-center space-x-3 mb-6">
         <div class="p-3 bg-amber-500/10 border border-amber-500/25 rounded-xl">
           <!-- Award Icon -->
