@@ -1,0 +1,6 @@
+{
+  "name": "Toshkent Aeroporti Navbat Tizimi",
+  "description": "Toshkent xalqaro aeroportida VIP va oddiy yo'lovchilar oqimini boshqaruvchi check-in navbat tizimi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
